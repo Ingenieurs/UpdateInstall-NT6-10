@@ -1,0 +1,324 @@
+@echo off
+set skript=3.3.0.1
+color 0f
+title Windows Desktop-Server-Embedded - Auto Updateinstall %skript% - IngenServerHost @2018
+@echo off
+setlocal ENABLEEXTENSIONS
+set versionNumber=3
+set regquery=reg query "HKLM\Software\Microsoft\Internet Explorer" /v svcVersion
+for /f "tokens=3" %%a in ('%regquery%') do (
+  for /f "tokens=1 delims=." %%b in ("%%a") do (
+    if %%b GEQ 10 (
+       set versionNumber=%%b
+    )
+  )
+)
+if %versionNumber% LSS 10 (
+  set regquery=reg query "HKLM\Software\Microsoft\Internet Explorer" /v Version 
+  for /f "tokens=3" %%a in ('%regquery%') do (
+    for /f "tokens=1 delims=." %%b in ("%%a") do (
+      set versionNumber=%%b
+    )
+  )    
+)
+chcp 1252>nul 
+set ue=ü
+set ae=ä
+set oe=ö
+set Uue=Ü
+set Aae=Ä
+set Ooe=Ö
+set ss=ß
+chcp 850>nul 
+goto FILECHECK
+
+:EXIT
+echo Das Programm wird beendet...
+ping -n 15 localhost > NUL
+exit
+
+:FILECHECK
+SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
+
+@echo off
+if exist %Systemroot%\system32\ping.exe (
+        set FILE1=0
+    ) ELSE (
+        set FILE1=1
+    )
+if exist %Systemroot%\system32\find.exe (
+        set FILE2=0
+    ) ELSE (
+        set FILE2=1
+    )
+if exist %Systemroot%\system32\findstr.exe (
+        set FILE3=0
+    ) ELSE (
+        set FILE3=1
+    )
+if exist %Systemroot%\system32\shutdown.exe (
+        set FILE4=0
+    ) ELSE (
+        set FILE4=1
+    )
+if exist %Systemroot%\system32\reg.exe (
+        set FILE5=0
+    ) ELSE (
+        set FILE5=1
+    )
+if exist %Systemroot%\system32\wusa.exe (
+        set FILE6=0
+    ) ELSE (
+        set FILE6=1
+    )		
+
+if %FILE1%==1 goto NOFILE
+if %FILE2%==1 goto NOFILE
+if %FILE3%==1 goto NOFILE
+if %FILE4%==1 goto NOFILE
+if %FILE5%==1 goto NOFILE
+if %FILE6%==1 goto NOFILE
+goto START
+
+:START
+@echo off
+VER |find /i "Windows 95" >NUL 
+IF %errorlevel% EQU 0 GOTO BEENDEN
+VER |find /i "Windows 98" >NUL 
+IF %errorlevel% EQU 0 GOTO BEENDEN
+VER |find /i "Windows Millennium" >NUL 
+IF %errorlevel% EQU 0 GOTO BEENDEN
+VER | find "Microsoft Windows [Version 5" > nul 
+IF %errorlevel% EQU 0 GOTO BEENDEN
+VER | find "XP" > nul 
+IF %errorlevel% EQU 0 GOTO BEENDEN
+VER | find "2000" > nul 
+IF %errorlevel% EQU 0 GOTO BEENDEN
+VER | find "NT" > nul 
+IF %errorlevel% EQU 0 GOTO BEENDEN
+VER | find "Microsoft Windows [Version 6.0" > nul 
+IF %errorlevel% EQU 0 set ver=6.0
+VER | find "Microsoft Windows [Version 6.1" > nul 
+IF %errorlevel% EQU 0 set ver=6.1
+VER | find "Microsoft Windows [Version 6.2" > nul 
+IF %errorlevel% EQU 0 set ver=windows8-rt
+VER | find "Microsoft Windows [Version 6.3" > nul 
+IF %errorlevel% EQU 0 set ver=windows8.1
+VER | find "Microsoft Windows [Version 10.0" > nul 
+IF %errorlevel% EQU 0 set ver=windows10.0
+
+reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=x86 || set OS=x64
+cls
+echo Automatische Update Installation MSU Pakete - IngenServerHost @2018
+echo.
+echo ###########################################################
+echo.
+
+if %OS%==x64 set arch=amd64
+if %OS%==x86 set arch=i386
+if %OS%==x64 set anderer=x86
+if %OS%==x86 set anderer=x64
+if %OS%==x64 set bit=32bit
+if %OS%==x86 set bit=64bit
+if %OS%==x64 set richtige=64bit
+if %OS%==x86 set richtige=32bit
+if %ver%==4.0 (goto BEENDEN)
+if %ver%==5.0 (goto BEENDEN)
+if %ver%==5.1 (goto BEENDEN)
+if %ver%==5.2 (goto BEENDEN)
+if %ver%==6.0 set system=Windows Vista
+if %ver%==6.1 set system=Windows 7
+if %ver%==windows8-rt set system=Windows 8 RTM
+if %ver%==windows8.1 set system=Windows 8.1
+if %ver%==windows10.0 set system=Windows 10
+
+if %versionNumber%==9 set ie1=8
+if %versionNumber%==9 set ie2=10
+if %versionNumber%==9 set ie3=11
+
+if %versionNumber%==10 set ie1=8
+if %versionNumber%==10 set ie2=9
+if %versionNumber%==10 set ie3=11
+
+if %versionNumber%==11 set ie1=8
+if %versionNumber%==11 set ie2=9
+if %versionNumber%==11 set ie3=10
+
+if %ver%==6.0 set ver1=6.1
+if %ver%==6.0 set ver2=windows8-rt
+if %ver%==6.0 set ver3=windows8.1
+if %ver%==6.0 set ver4=windows10.0
+
+goto OS
+:NOFILE
+SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
+color 0c
+cls
+echo Windows Desktop-Server-Embedded - Auto Updateinstall %skript% - IngenServerHost @2018
+echo.
+echo ###########################################################
+echo.
+echo Deinem System fehlen wichtige Dateien, zum ausf%ue%hren dieses Programms.
+echo Fehlende Dateien:
+
+if %FILE1%==1 echo ping.exe (im System32 Ordner)
+if %FILE2%==1 echo find.exe (im System32 Ordner)
+if %FILE3%==1 echo findstr.exe (im System32 Ordner)
+if %FILE4%==1 echo shutdown.exe (im System32 Ordner)
+if %FILE5%==1 echo reg.exe (im System32 Ordner)
+if %FILE6%==1 echo wusa.exe (im System32 Ordner)
+echo.
+echo Best%ae%tige mit einer Beliebigen Taste die Beendung des Programms.
+pause >NUL
+goto EXIT
+
+:BEENDEN
+echo.
+echo Dein verwendetes Betriebssystem unterst%ue%tzt die folgenden MSU Pakete nicht!
+goto EXIT
+
+:OS
+title %system% AutoUpdate Installation MSU Pakete %skript% - IngenServerHost @2018
+echo Dein  Betriebssystem verwendet die %OS% (%arch%) Architektur
+echo.
+echo ###########################################################
+echo.
+echo Scanne den Ordner auf Kompatible Updates...
+echo.
+echo ###########################################################
+echo.
+
+IF EXIST *.msu (
+        goto CONTINUE
+    ) ELSE (
+        goto NOUPDATES
+    )
+:CONTINUE
+if exist *%anderer%* goto WRONG
+if not %ver%==6.0 goto FOLDER2
+
+:FOLDER
+if exist *%ver1%* goto WRONG
+if exist *%ver2%* goto WRONG
+if exist *%ver3%* goto WRONG
+if exist *%ver4%* goto WRONG
+goto OSSTART
+
+:FOLDER2
+if exist Temp goto FOLDER3
+md Temp >NUL
+
+:FOLDER3
+copy *.msu Temp >NUL
+dir /b /a-d Temp | findstr /ivc "%ver%.*%os%.*\.msu" >nul 2>&1 && (
+    goto WRONG 
+) || (
+    goto OSSTART
+)
+
+:WRONG
+if not %ver%==6.0 del Temp /Q >NUL
+echo In dem Ordner unkompatibele sind Updates eines anderen Systems, oder der %bit% (%anderer%) Version vorhanden.
+echo Entferne diese und verwende Kompatible Windows Versionen, oder %richtige% (%OS%) Updates.
+goto EXIT
+
+:NOUPDATES
+echo In dem Ordner sind keinerlei Updates vorhanden!
+goto EXIT
+
+:OSSTART
+if not %ver%==6.0 del Temp /Q >NUL
+if %ver%==windows8-rt goto WIN8
+if %ver%==windows8.1 goto WIN8
+if %ver%==windows10.0 goto WIN8
+goto VISTA7
+
+:VISTA7
+echo Beginne mit dem Update Vorgang...
+@echo off
+SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
+FOR /R "%~dp0" %%A IN (windows%ver%*%OS%*.msu) DO (
+        ECHO= Installing %%~nA
+        ping localhost -n 3 >NUL
+        WUSA "%%A" /quiet /norestart)
+goto IECHECK
+
+:WIN8
+echo Beginne mit dem Update Vorgang...
+@echo off
+SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
+FOR /R "%~dp0" %%A IN (%ver%*%OS%*.msu) DO (
+        ECHO= Installing %%~nA
+        ping localhost -n 3 >NUL
+        WUSA "%%A" /quiet /norestart)
+goto RESTARTCHECK
+
+:IECHECK
+echo.
+echo ###########################################################
+echo.
+echo Scanne auf Internet Explorer %versionNumber% Updates...
+echo.
+echo ###########################################################
+echo.
+
+if %versionNumber% LSS 9 goto WRONGIE
+if exist ie%ie1%* goto WRONG
+if exist ie%ie2%* goto WRONG
+if exist ie%ie3%* goto WRONG
+if exist *ie**%anderer%*.msu (GOTO WRONG)
+if exist *ie%versionNumber%*%OS%*.msu (GOTO IEINSTALL)
+if %versionNumber%==7 (GOTO RESTARTCHECK)
+if not exist *ie%versionNumber%*%OS%*.msu (GOTO RESTARTCHECK)
+
+:WRONGIE
+echo Dein Internet Explorer wird nicht unterst%ue%tzt.
+echo Update diesen auf mindestens Version 9 um Updates mit dem Tool
+echo installieren zu k%oe%nnen
+echo.
+goto :EXIT
+
+:IEINSTALL
+@echo off
+SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
+FOR /R "%~dp0" %%A IN (*ie%versionNumber%*%OS%*.msu) DO (
+        ECHO= Installing %%~nA
+        >NUL TIMEOUT /t 3
+        WUSA "%%A" /quiet /norestart)
+goto RESTARTCHECK
+
+
+:RESTARTCHECK
+echo.
+echo ###########################################################
+echo.
+echo Pr%ue%fe ob ein Neustart notwenig ist...
+echo.
+@echo off
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired" >nul 2>nul
+if %ERRORLEVEL%==0 goto DONE
+if %ERRORLEVEL%==1 goto NORESTART
+
+:NORESTART
+color 0a
+cls
+echo Der Updatevorgang ist durchgelaufen!
+echo.
+echo ###########################################################
+echo.
+echo Es ist kein PC Neustart notwenig!
+goto EXIT
+
+
+:DONE
+color 0a
+cls
+echo Der Updatevorgang ist durchgelaufen!
+echo.
+echo ###########################################################
+echo.
+echo Der PC wird nun neugestartet um den Vorgang abzuschlie%ss%en...
+
+ping -n 6 localhost > NUL
+shutdown /r /t 0 /f
+exit
